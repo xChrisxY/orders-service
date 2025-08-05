@@ -15,7 +15,7 @@ from ....shared.exceptions import BusinessException
 
 class CreateOrderUseCase:
     
-    def __init__(self, order_repository: order_repository, event_publisher: Optional[Object] = None):
+    def __init__(self, order_repository: order_repository, event_publisher: Optional[object] = None):
         self.order_repository = order_repository
         self.event_publisher = event_publisher
         

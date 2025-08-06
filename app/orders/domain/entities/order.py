@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from typing import List, Optional 
-from pydantic import BaseModel, Field 
+from pydantic import BaseModel, Field, field_validator
 from bson import ObjectId 
 
 from .enums import OrderStatus 
@@ -23,8 +23,16 @@ class Order(BaseModel):
     estimated_delivery_time: Optional[datetime] = None
     delivered_at: Optional[datetime] = None
     
+    @field_validator('id', mode='before')
+    @classmethod
+    def validate_object_id(cls, v):
+        if isinstance(v, ObjectId):
+            return str(v)
+        return v
+    
     class Config:
         populate_by_name = True 
+        arbitrary_types_allowed = True
         json_encoders = {
             ObjectId: str, 
             datetime: lambda v: v.isoformat()

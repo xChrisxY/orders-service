@@ -12,6 +12,7 @@ from ..dto.order_response_dto import OrderResponseDTO
 
 from ....shared.exceptions import BusinessException
 
+from ..events.order_created_event import OrderCreatedEvent
 
 class CreateOrderUseCase:
     
@@ -68,7 +69,16 @@ class CreateOrderUseCase:
             # Publish order created event for SAGA orchestration
             
             if self.event_publisher:
-                pass 
+                event = OrderCreatedEvent(
+                    order_id=created_order.id, 
+                    user_id=created_order.user_id, 
+                    restaurant_id=created_order.restaurant_id, 
+                    total_amount=created_order.total_amount,
+                    items=created_order.items, 
+                    created_at=created_order.created_at
+                )
+
+                await self.event_publisher.publish(event)
             
             return created_order
          

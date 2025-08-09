@@ -1,6 +1,5 @@
 from fastapi import FastAPI, HTTPException 
 from fastapi.middleware.cors import CORSMiddleware 
-from fastapi.responses import JSONResponse 
 from contextlib import asynccontextmanager 
 import logging 
 
@@ -8,8 +7,6 @@ from .config.settings import settings
 from .config.database import connect_to_mongo, close_mongo_connection
 
 from .orders.infraestructure.routers.order_router import router as orders_router 
-
-from .shared.exceptions import BusinessException, NotFoundException, ValidationException, UnauthorizedException, ConflictException
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

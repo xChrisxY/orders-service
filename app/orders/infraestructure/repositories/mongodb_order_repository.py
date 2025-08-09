@@ -51,16 +51,13 @@ class MongoDBOrderRepository(OrderRepository):
             object_id = ObjectId(order_id)
             order = await self.collection.find_one({"_id": object_id})
 
-            if not order:
-                return False
-
-            from datetime import datetime, timezone
             update_data = {
                 "status": status, 
-                "updated_at": datetime.now(timezone.utc)
+                "updated_at" : order.updated_at
             }
 
             if status == OrderStatus.DELIVERED:
+                from datetime import datetime, timezone
                 update_data["delivered_at"] = datetime.now(timezone.utc)
 
             result = await self.collection.update_one(
@@ -103,10 +100,10 @@ class MongoDBOrderRepository(OrderRepository):
                 "_id" : object_id 
             })
 
-            return result.deleted_count > 0
+            return result.delete_count > 0
         
         except Exception as e:
-            raise NotFoundException(f"Order with id {order_id} not found")
+            return False
 
     async def get_by_restaurant_id(self, restaurant_id, limit = 10, skip = 0):
         return await super().get_by_restaurant_id(restaurant_id, limit, skip)

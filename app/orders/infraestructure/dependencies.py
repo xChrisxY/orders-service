@@ -2,12 +2,16 @@ from functools import lru_cache
 from ...config.database import get_database
 from ..domain.repositories.order_repository import OrderRepository
 from ..infraestructure.repositories.mongodb_order_repository import MongoDBOrderRepository
+
 from ..application.use_cases.create_order_use_case import CreateOrderUseCase
 from ..application.use_cases.get_order_use_case import GetOrderUseCase
 from ..application.use_cases.get_orders_by_user_use_case import GetOrdersByUserUseCase
 from ..application.use_cases.update_order_status_use_case import UpdateOrderStatusUseCase
 from ..application.use_cases.delete_order_use_case import DeleteOrderUseCase
+
 from ..infraestructure.controllers.order_controller import OrderController
+from ..infraestructure.messaging.rabbitmq_publisher import RabbitMQPublisher
+from ..infraestructure.messaging.event_publisher import EventPublisher
 
 # Repository dependencies
 @lru_cache()
@@ -16,13 +20,24 @@ def get_order_repository() -> OrderRepository:
     database = get_database()
     return MongoDBOrderRepository(database)
 
+# Messaging dependencies 
+@lru_cache()
+def get_rabbitmq_publisher() -> RabbitMQPublisher:
+    return RabbitMQPublisher()
+
+@lru_cache()
+def get_event_publisher() -> EventPublisher: 
+    rabbitmq_publisher = get_rabbitmq_publisher()
+    return EventPublisher(rabbitmq_publisher)
+
 
 # Use case dependencies
 @lru_cache()
 def get_create_order_use_case() -> CreateOrderUseCase:
     """Get create order use case instance"""
     order_repository = get_order_repository()
-    return CreateOrderUseCase(order_repository)
+    event_publisher = get_event_publisher()
+    return CreateOrderUseCase(order_repository, event_publisher)
 
 
 @lru_cache()
